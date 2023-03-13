@@ -1,29 +1,41 @@
-Jenkinsfile (Declarative Pipeline)
 pipeline {
-    agent any
-    stages {
-        stage('Test') {
-            steps {
-                sh 'echo "Fail!"; exit 1'
+     agent any
+     stages {
+         stage('Build') {
+             steps {
+                 echo 'Building...'
+             }
+             post {
+                 always {
+                     jiraSendBuildInfo site: 'example.atlassian.net'
+                 }
+             }
+         }
+         stage('Deploy - Staging') {
+             when {
+                 branch 'master'
+             }
+             steps {
+                 echo 'Deploying to Staging from master...'
+             }
+             post {
+                 always {
+                     jiraSendDeploymentInfo environmentId: 'us-stg-1', environmentName: 'us-stg-1', environmentType: 'staging'
+                 }
+             }
+         }
+         stage('Deploy - Production') {
+            when {
+                branch 'master'
             }
-        }
-    }
-    post {
-        always {
-            echo 'This will always run'
-        }
-        success {
-            echo 'This will run only if successful'
-        }
-        failure {
-            echo 'This will run only if failed'
-        }
-        unstable {
-            echo 'This will run only if the run was marked as unstable'
-        }
-        changed {
-            echo 'This will run only if the state of the Pipeline has changed'
-            echo 'For example, if the Pipeline was previously failing but is now successful'
-        }
-    }
-}
+            steps {
+                echo 'Deploying to Production from master...'
+            }
+            post {
+                always {
+                    jiraSendDeploymentInfo environmentId: 'us-prod-1', environmentName: 'us-prod-1', environmentType: 'production'
+                }
+            }
+         }
+     }
+ }
