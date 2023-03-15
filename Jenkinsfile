@@ -4,6 +4,8 @@ pipeline {
          stage('Build') {
              steps {
                  echo 'Building...'
+
+                 checkmarxASTScanner additionalOptions: '--project-tags jenkins --scan-types sast,sca,kics --file-source https://github.com/group5five/ProjectCYT300.git'
              }
              post {
                  always {
